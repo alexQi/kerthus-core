@@ -41,15 +41,29 @@ func NormalizeState(value string) State {
 	}
 }
 
+// Input is a scoped media reference for a model invocation. Authorization is
+// deliberately absent: the application obtains a short-lived job permit via
+// the media/authorization clients and the platform binds it server-side.
+type Input struct {
+	MediaID        int64
+	ContentVersion string
+	Role           string
+}
+
 type Invocation struct {
-	Authorization  string
-	Selector       string
-	IdempotencyKey string
-	Prompt         string
-	Provider       string
-	Model          string
-	Attempt        int32
-	RootRunID      string
+	Authorization   string
+	Selector        string
+	IdempotencyKey  string
+	Prompt          string
+	Size            string
+	Seconds         int32
+	Texts           []string
+	Inputs          []Input
+	MaxOutputTokens int64
+	Provider        string
+	Model           string
+	Attempt         int32
+	RootRunID       string
 }
 
 type Receipt struct {
@@ -64,6 +78,13 @@ type Receipt struct {
 	RequestID      string
 	ResultJSON     string
 	UsageJSON      string
+	QueuePhase     string
+	RootRunID      string
+}
+
+type QueryRequest struct {
+	Authorization string
+	CallID        int64
 }
 
 type ReconcileRequest struct {
@@ -80,6 +101,21 @@ func (i Invocation) Validate() error {
 	}
 	if i.Attempt < 0 {
 		return fmt.Errorf("attempt cannot be negative")
+	}
+	if i.Seconds < 0 || i.MaxOutputTokens < 0 {
+		return fmt.Errorf("seconds and max output tokens cannot be negative")
+	}
+	for _, input := range i.Inputs {
+		if input.MediaID <= 0 {
+			return fmt.Errorf("model input media ID is required")
+		}
+	}
+	return nil
+}
+
+func (q QueryRequest) Validate() error {
+	if q.Authorization == "" || q.CallID <= 0 {
+		return fmt.Errorf("authorization and call ID are required")
 	}
 	return nil
 }

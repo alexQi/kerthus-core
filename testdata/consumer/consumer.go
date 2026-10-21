@@ -38,6 +38,9 @@ func Compile(platform rpcv1.PlatformService, serviceKey string) error {
 	if _, err := appmodels.New(platform, "fablex", serviceKey); err != nil {
 		return err
 	}
+	if _, err := appmodels.NewStable(platform, "fablex", serviceKey); err != nil {
+		return err
+	}
 	if _, err := appmedia.New(platform, "fablex", serviceKey, func(context.Context, *rpcv1.AccessReply, appmedia.Scope) error { return nil }); err != nil {
 		return err
 	}
