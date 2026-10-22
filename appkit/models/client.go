@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/alexQi/kerthus-core/appkit/rpcauth"
 	pb "github.com/alexQi/kerthus-core/rpc/saas/v1"
@@ -10,6 +11,12 @@ import (
 	"google.golang.org/protobuf/proto"
 	"time"
 )
+
+// ModelCallRPCTimeout covers the platform's ten-minute provider window and
+// leaves time for receipt persistence and the RPC response.
+const ModelCallRPCTimeout = 10*time.Minute + 30*time.Second
+
+var ErrCallNotFound = errors.New("platform model call not found")
 
 // Client is for application workers. Supply a job authorization, never a login token.
 type Client struct {
@@ -43,10 +50,10 @@ func (c *Client) SubmitWithInputs(ctx context.Context, jobAuthorization, selecto
 		frozen = append(frozen, copy)
 	}
 
-	return admissionResult(c.platform.SubmitApplicationModel(rpcauth.WithCredential(ctx, c.key), &pb.ModelSubmitRequest{Auth: c.auth(jobAuthorization), Selector: selector, IdempotencyKey: key, Prompt: prompt, Size: size, Seconds: seconds, Inputs: frozen}, client.WithRequestTimeout(200*time.Second)))
+	return admissionResult(c.platform.SubmitApplicationModel(rpcauth.WithCredential(ctx, c.key), &pb.ModelSubmitRequest{Auth: c.auth(jobAuthorization), Selector: selector, IdempotencyKey: key, Prompt: prompt, Size: size, Seconds: seconds, Inputs: frozen}, client.WithRequestTimeout(ModelCallRPCTimeout)))
 }
 func (c *Client) Query(ctx context.Context, jobAuthorization string, id int64) (*pb.ModelCallReply, error) {
-	return c.platform.QueryApplicationModel(rpcauth.WithCredential(ctx, c.key), &pb.ModelCallRequest{Auth: c.auth(jobAuthorization), CallId: id}, client.WithRequestTimeout(200*time.Second))
+	return c.platform.QueryApplicationModel(rpcauth.WithCredential(ctx, c.key), &pb.ModelCallRequest{Auth: c.auth(jobAuthorization), CallId: id}, client.WithRequestTimeout(ModelCallRPCTimeout))
 }
 func (c *Client) Cancel(ctx context.Context, jobAuthorization string, id int64) (*pb.ModelCallReply, error) {
 	return c.platform.CancelApplicationModel(rpcauth.WithCredential(ctx, c.key), &pb.ModelCallRequest{Auth: c.auth(jobAuthorization), CallId: id})
@@ -65,7 +72,14 @@ func (c *Client) Lookup(ctx context.Context, jobAuthorization string, frozen *pb
 		}
 		ref.Authorization = ""
 	}
-	return c.platform.LookupApplicationModel(rpcauth.WithCredential(ctx, c.key), &pb.ModelLookupRequest{Request: req})
+	reply, err := c.platform.LookupApplicationModel(rpcauth.WithCredential(ctx, c.key), &pb.ModelLookupRequest{Request: req})
+	if err != nil {
+		rpcErr := microerrors.FromError(err)
+		if rpcErr.Id == "kerthus.saas" && rpcErr.Code == 404 {
+			return nil, ErrCallNotFound
+		}
+	}
+	return reply, err
 }
 
 // SubmitRequest supports research batches; credentials and media permits never come from the caller.
@@ -86,7 +100,7 @@ func (c *Client) SubmitRequest(ctx context.Context, jobAuthorization string, fro
 			}
 			return existing, nil
 		}
-		if microerrors.Parse(lookupErr.Error()).Code != 404 {
+		if !errors.Is(lookupErr, ErrCallNotFound) {
 			return nil, lookupErr
 		}
 		catalog, err := c.Catalog(ctx, jobAuthorization)
@@ -112,7 +126,7 @@ func (c *Client) SubmitRequest(ctx context.Context, jobAuthorization string, fro
 		}
 		ref.Authorization = ""
 	}
-	return admissionResult(c.platform.SubmitApplicationModel(rpcauth.WithCredential(ctx, c.key), req, client.WithRequestTimeout(200*time.Second)))
+	return admissionResult(c.platform.SubmitApplicationModel(rpcauth.WithCredential(ctx, c.key), req, client.WithRequestTimeout(ModelCallRPCTimeout)))
 }
 
 // ControlRun is safe to replay from an application outbox with the same sequence.

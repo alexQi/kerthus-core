@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/alexQi/kerthus-core/appkit/rpcauth"
 	contractmodels "github.com/alexQi/kerthus-core/models"
@@ -90,7 +89,7 @@ func (c *Client) submitFrozen(ctx context.Context, jobAuthorization string, froz
 		}
 		ref.Authorization = ""
 	}
-	return admissionResult(c.platform.SubmitApplicationModel(rpcauth.WithCredential(ctx, c.key), req, client.WithRequestTimeout(200*time.Second)))
+	return admissionResult(c.platform.SubmitApplicationModel(rpcauth.WithCredential(ctx, c.key), req, client.WithRequestTimeout(ModelCallRPCTimeout)))
 }
 
 func receiptFromReply(reply *pb.ModelCallReply, invocation *contractmodels.Invocation) contractmodels.Receipt {

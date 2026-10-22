@@ -1,10 +1,12 @@
 package models
 
 import (
+	"context"
 	"testing"
 
 	contractmodels "github.com/alexQi/kerthus-core/models"
 	pb "github.com/alexQi/kerthus-core/rpc/saas/v1"
+	"go-micro.dev/v6/client"
 )
 
 func TestReceiptFromReplyMapsStableFields(t *testing.T) {
@@ -41,5 +43,50 @@ func TestStableInvocationRejectsUnscopedInput(t *testing.T) {
 	invocation := contractmodels.Invocation{Authorization: "job", Selector: "image", IdempotencyKey: "idem", Inputs: []contractmodels.Input{{Role: "image"}}}
 	if err := invocation.Validate(); err == nil {
 		t.Fatal("input without a media ID was accepted")
+	}
+}
+
+type receiptPlatform struct {
+	pb.PlatformService
+	state                     string
+	queries, rebinds, submits int
+}
+
+func (p *receiptPlatform) QueryApplicationModel(_ context.Context, _ *pb.ModelCallRequest, _ ...client.CallOption) (*pb.ModelCallReply, error) {
+	p.queries++
+	return &pb.ModelCallReply{CallId: 42, State: p.state}, nil
+}
+func (p *receiptPlatform) RebindApplicationModel(_ context.Context, _ *pb.ModelRebindRequest, _ ...client.CallOption) (*pb.ModelCallReply, error) {
+	p.rebinds++
+	return &pb.ModelCallReply{CallId: 42, State: p.state}, nil
+}
+func (p *receiptPlatform) SubmitApplicationModel(_ context.Context, _ *pb.ModelSubmitRequest, _ ...client.CallOption) (*pb.ModelCallReply, error) {
+	p.submits++
+	return &pb.ModelCallReply{CallId: 43, State: "completed"}, nil
+}
+
+func TestStableUnknownAndWaitingReceiptNeverResubmit(t *testing.T) {
+	p := &receiptPlatform{state: "unknown"}
+	c, err := NewStable(p, "fablex", "01234567890123456789012345678901")
+	if err != nil {
+		t.Fatal(err)
+	}
+	query := contractmodels.QueryRequest{Authorization: "grant", CallID: 42}
+	for _, state := range []struct {
+		wire string
+		want contractmodels.State
+	}{{"unknown", contractmodels.StateUnknown}, {"waiting_receipt", contractmodels.StateWaitingReceipt}} {
+		p.state = state.wire
+		got, err := c.Query(context.Background(), query)
+		if err != nil || got.State != state.want {
+			t.Fatal(got, err)
+		}
+		got, err = c.Reconcile(context.Background(), contractmodels.ReconcileRequest{Authorization: "grant", CallID: 42, IdempotencyKey: "original"})
+		if err != nil || got.State != state.want || got.IdempotencyKey != "original" {
+			t.Fatal(got, err)
+		}
+	}
+	if p.queries != 2 || p.rebinds != 2 || p.submits != 0 {
+		t.Fatal("read-only recovery submitted a paid call")
 	}
 }

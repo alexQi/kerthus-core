@@ -27,6 +27,9 @@ func admissionResult(reply *pb.ModelCallReply, err error) (*pb.ModelCallReply, e
 		return reply, nil
 	}
 	parsed := microerrors.Parse(err.Error())
+	if parsed.Id == "kerthus.saas" && parsed.Code == 429 && parsed.Detail == "当前应用模型的每日调用额度已用完" {
+		return reply, &AdmissionError{Code: "model_daily_quota_exhausted", RetryAfter: time.Minute, NotSent: true}
+	}
 	if parsed.Id == "kerthus.model.admission" && parsed.Code == 429 {
 		var v struct {
 			Code       string `json:"code"`
