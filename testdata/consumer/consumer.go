@@ -9,6 +9,7 @@ import (
 	appdb "github.com/alexQi/kerthus-core/appkit/database"
 	appmedia "github.com/alexQi/kerthus-core/appkit/media"
 	appmodels "github.com/alexQi/kerthus-core/appkit/models"
+	"github.com/alexQi/kerthus-core/appmanifest"
 	"github.com/alexQi/kerthus-core/authorization"
 	appctx "github.com/alexQi/kerthus-core/context"
 	mediacontract "github.com/alexQi/kerthus-core/media"
@@ -26,6 +27,7 @@ func Compile(platform rpcv1.PlatformService, serviceKey string) error {
 		return err
 	}
 	_ = appcontract.Digest([]byte("public"))
+	_ = appmanifest.Manifest{AppCode: "fablex"}.OperationIDs()
 	if err := (authorization.Request{Context: authorization.Context{TenantID: 1}, AppCode: "fablex", Method: "GET", Path: "/api/apps/fablex/v1/health"}).Validate(); err != nil {
 		return err
 	}

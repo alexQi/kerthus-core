@@ -2,7 +2,7 @@ module example.com/kerthus-core-consumer
 
 go 1.26.0
 
-require github.com/alexQi/kerthus-core v1.0.0
+require github.com/alexQi/kerthus-core v1.0.3
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

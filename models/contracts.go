@@ -66,6 +66,44 @@ type Invocation struct {
 	RootRunID       string
 }
 
+// Diagnostic is the provider-neutral execution diagnostic returned with a
+// model receipt. It contains bounded execution metadata and retry guidance;
+// provider credentials, prompts, URLs, and raw upstream bodies are excluded.
+type Diagnostic struct {
+	Code               string
+	Phase              string
+	HTTPStatus         int32
+	UpstreamRequestID  string
+	Submission         string
+	Message            string
+	RetrySafe          bool
+	UpstreamStatusCode string
+	UpstreamLogID      string
+	RequestBytes       int32
+	RequestSHA256      string
+	RouteSHA256        string
+	Protocol           string
+	Model              string
+	StartedAtUnixMS    int64
+	FinishedAtUnixMS   int64
+	DNSMS              int64
+	ConnectMS          int64
+	TLSMS              int64
+	WriteMS            int64
+	FirstByteMS        int64
+	ReadMS             int64
+	HTTPVersion        string
+	ALPN               string
+	RemoteAddr         string
+	UpstreamErrorCode  string
+	UpstreamErrorType  string
+	UpstreamMessage    string
+	RetryClass         string
+	RetryAfterSeconds  int64
+	RetryPolicy        string
+	ExecutionOutcome   string
+}
+
 type Receipt struct {
 	CallID         int64
 	State          State
@@ -80,6 +118,7 @@ type Receipt struct {
 	UsageJSON      string
 	QueuePhase     string
 	RootRunID      string
+	Diagnostic     *Diagnostic
 }
 
 type QueryRequest struct {

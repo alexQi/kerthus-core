@@ -8,4 +8,12 @@
    For scheduler replays, only `errors.Is(err, appkitmodels.ErrCallNotFound)` confirms that the platform ledger has no original call. A transport 404, timeout, or revoked grant must not trigger another submission. Model submit/query RPCs allow 10 minutes 30 seconds; callers may set a shorter context deadline.
 6. Use `appkit/media` with an application ACL callback. Media references must retain tenant/app/object/purpose/owner scope; do not expose platform storage tables.
 
+For application registration, use `appmanifest.Manifest`, `Resource`, and
+`Operation` as the shared DTOs. Call `Manifest.Validate` before publishing a
+manifest and persist its `Fingerprint`. The platform loader remains responsible
+for reading files, parsing OpenAPI, checking project paths, and building its
+internal catalog. v1 clients must tolerate missing fields from the previous v1
+patch and must not reuse an idempotency key after an unknown submission without
+reconciliation.
+
 The v1 module has no FableX business types. Creative, research, scripts, production workflows, HTTP handlers, business migrations, and the `kerthus_fablex` schema remain in the application repository.

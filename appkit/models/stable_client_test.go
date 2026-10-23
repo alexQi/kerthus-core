@@ -15,7 +15,7 @@ func TestReceiptFromReplyMapsStableFields(t *testing.T) {
 		State:      "completed",
 		RequestId:  "req-42",
 		ResultJson: `{"ok":true}`,
-		Diagnostic: &pb.ModelCallDiagnostic{Code: "provider_timeout", Model: "gpt-image-2", Message: "upstream timed out"},
+		Diagnostic: &pb.ModelCallDiagnostic{Code: "provider_timeout", Model: "gpt-image-2", Message: "upstream timed out", RetryClass: "transient", RetryAfterSeconds: 5, RetryPolicy: "bounded", ExecutionOutcome: "not_submitted", RetrySafe: true, Phase: "connect"},
 		QueuePhase: "finished",
 	}
 	invocation := &contractmodels.Invocation{IdempotencyKey: "idem-42", Attempt: 2, Provider: "openai", RootRunID: "run-42"}
@@ -29,6 +29,9 @@ func TestReceiptFromReplyMapsStableFields(t *testing.T) {
 	}
 	if receipt.ErrorClass != "provider_timeout" || receipt.Model != "gpt-image-2" || receipt.Message != "upstream timed out" {
 		t.Fatalf("diagnostic fields were not normalized: %#v", receipt)
+	}
+	if receipt.Diagnostic == nil || receipt.Diagnostic.RetryClass != "transient" || receipt.Diagnostic.RetryAfterSeconds != 5 || receipt.Diagnostic.ExecutionOutcome != "not_submitted" || !receipt.Diagnostic.RetrySafe {
+		t.Fatalf("diagnostic detail was not preserved: %#v", receipt.Diagnostic)
 	}
 }
 

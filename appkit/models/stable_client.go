@@ -116,6 +116,22 @@ func receiptFromReply(reply *pb.ModelCallReply, invocation *contractmodels.Invoc
 		}
 	}
 	if diagnostic := reply.GetDiagnostic(); diagnostic != nil {
+		receipt.Diagnostic = &contractmodels.Diagnostic{
+			Code: diagnostic.GetCode(), Phase: diagnostic.GetPhase(), HTTPStatus: diagnostic.GetHttpStatus(),
+			UpstreamRequestID: diagnostic.GetUpstreamRequestId(), Submission: diagnostic.GetSubmission(),
+			Message: diagnostic.GetMessage(), RetrySafe: diagnostic.GetRetrySafe(),
+			UpstreamStatusCode: diagnostic.GetUpstreamStatusCode(), UpstreamLogID: diagnostic.GetUpstreamLogId(),
+			RequestBytes: diagnostic.GetRequestBytes(), RequestSHA256: diagnostic.GetRequestSha256(),
+			RouteSHA256: diagnostic.GetRouteSha256(), Protocol: diagnostic.GetProtocol(), Model: diagnostic.GetModel(),
+			StartedAtUnixMS: diagnostic.GetStartedAtUnixMs(), FinishedAtUnixMS: diagnostic.GetFinishedAtUnixMs(),
+			DNSMS: diagnostic.GetDnsMs(), ConnectMS: diagnostic.GetConnectMs(), TLSMS: diagnostic.GetTlsMs(),
+			WriteMS: diagnostic.GetWriteMs(), FirstByteMS: diagnostic.GetFirstByteMs(), ReadMS: diagnostic.GetReadMs(),
+			HTTPVersion: diagnostic.GetHttpVersion(), ALPN: diagnostic.GetAlpn(), RemoteAddr: diagnostic.GetRemoteAddr(),
+			UpstreamErrorCode: diagnostic.GetUpstreamErrorCode(), UpstreamErrorType: diagnostic.GetUpstreamErrorType(),
+			UpstreamMessage: diagnostic.GetUpstreamMessage(), RetryClass: diagnostic.GetRetryClass(),
+			RetryAfterSeconds: diagnostic.GetRetryAfterSeconds(), RetryPolicy: diagnostic.GetRetryPolicy(),
+			ExecutionOutcome: diagnostic.GetExecutionOutcome(),
+		}
 		receipt.ErrorClass = diagnostic.GetCode()
 		if receipt.Message == "" {
 			receipt.Message = diagnostic.GetMessage()
