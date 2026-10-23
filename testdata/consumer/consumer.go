@@ -48,6 +48,7 @@ func Compile(platform rpcv1.PlatformService, serviceKey string) error {
 	}
 	var scope mediacontract.Scope
 	var invocation modelcontract.Invocation
+	_, _ = modelcontract.ParseResearchResult([]byte(`{"schema":"research.v1","kind":"embedding"}`))
 	_ = appctx.Scope{TenantID: 1, App: appctx.App{ID: 1, Code: "fablex"}, RequestID: "req-1"}
 	_ = scope
 	_ = invocation

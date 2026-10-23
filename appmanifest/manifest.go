@@ -193,16 +193,64 @@ func routesOverlap(leftPath, rightPath string) bool {
 	return true
 }
 
-// Fingerprint returns the stable SHA-256 identity of a validated manifest.
+// Fingerprint returns the schema-v1 SHA-256 identity of a manifest. Call
+// Validate or the platform loader before using it for registration decisions.
 func (m Manifest) Fingerprint() (string, error) {
-	if err := m.Validate(); err != nil {
-		return "", err
+	// The platform registered schema-v1 manifests with Go field names in the
+	// fingerprint JSON. Keep that byte representation even though the public
+	// DTO has snake_case JSON tags for interchange.
+	legacy := struct {
+		SchemaVersion      int
+		AppCode            string
+		Name               string
+		ReleaseVersion     string
+		PlatformAPIVersion string
+		ResourceVersion    int64
+		HTTPContract       string
+		ServiceKey         string
+		RoutePrefix        string
+		FrontendEntry      string
+		Home               string
+		Resources          []fingerprintResource
+		Operations         []Operation
+	}{
+		m.SchemaVersion, m.AppCode, m.Name, m.ReleaseVersion,
+		m.PlatformAPIVersion, m.ResourceVersion, m.HTTPContract,
+		m.ServiceKey, m.RoutePrefix, m.FrontendEntry, m.Home,
+		nil, m.Operations,
 	}
-	b, err := json.Marshal(m)
+	if m.Resources != nil {
+		legacy.Resources = make([]fingerprintResource, 0, len(m.Resources))
+		for _, resource := range m.Resources {
+			legacy.Resources = append(legacy.Resources, fingerprintResource{
+				OpenWith: resource.OpenWith, Redirect: resource.Redirect,
+				Meta: resource.Meta, Code: resource.Code, ParentCode: resource.ParentCode,
+				Name: resource.Name, Type: resource.Type, Path: resource.Path,
+				Component: resource.Component, Icon: resource.Icon, Sort: resource.Sort,
+				DataScope: resource.DataScope,
+			})
+		}
+	}
+	b, err := json.Marshal(legacy)
 	if err != nil {
 		return "", err
 	}
 	return fmt.Sprintf("%x", sha256.Sum256(b)), nil
+}
+
+type fingerprintResource struct {
+	OpenWith   string `json:",omitempty"`
+	Redirect   string `json:",omitempty"`
+	Meta       map[string]any
+	Code       string
+	ParentCode string
+	Name       string
+	Type       string
+	Path       string
+	Component  string
+	Icon       string
+	Sort       int32
+	DataScope  bool
 }
 
 // OperationIDs returns deterministic operation ordering for catalog tooling.

@@ -25,8 +25,24 @@ func TestManifestValidationAndFingerprint(t *testing.T) {
 	if err != nil || first != second || len(first) != 64 {
 		t.Fatalf("unstable fingerprint: %q %q %v", first, second, err)
 	}
+	const legacyHash = "62ae7d7dcc6f0ccb0fddfcb38e835bd16429cc0d1fa2df6394c6ee06ce4b7588"
+	if first != legacyHash {
+		t.Fatalf("legacy fingerprint changed: got %s want %s", first, legacyHash)
+	}
 	if got := m.OperationIDs(); len(got) != 1 || got[0] != "notes.read" {
 		t.Fatalf("unexpected operation IDs: %#v", got)
+	}
+}
+
+func TestFingerprintAlsoCoversPlatformBuiltins(t *testing.T) {
+	m := validManifest()
+	m.AppCode = "basic"
+	m.RoutePrefix = "/system"
+	if err := m.Validate(); err == nil {
+		t.Fatal("builtin app unexpectedly passed external app validation")
+	}
+	if hash, err := m.Fingerprint(); err != nil || len(hash) != 64 {
+		t.Fatalf("builtin manifest could not be fingerprinted: %q %v", hash, err)
 	}
 }
 

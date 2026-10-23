@@ -14,7 +14,9 @@ removed or repurposed within v1. A client must not infer that an absent field
 means a negative result; it uses the documented default and stable state
 contract instead.
 
-The compatibility tests in `rpc/saas/v1/compatibility_test.go` lock the public
-method names, model receipt field numbers, diagnostic append-only fields, and
-unknown-field decoding behavior. Platform integration tests are responsible for
-proving that a deployed server accepts both client versions.
+The `v1.0.3` descriptor fixture and tests in
+`rpc/saas/v1/compatibility_test.go` lock every previously published message
+field, enum value, and RPC method, as well as unknown-field decoding. The
+service credential header has its own regression test. Platform integration
+tests remain responsible for proving that a deployed server accepts both client
+versions.

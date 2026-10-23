@@ -9,8 +9,9 @@
 6. Use `appkit/media` with an application ACL callback. Media references must retain tenant/app/object/purpose/owner scope; do not expose platform storage tables.
 
 For application registration, use `appmanifest.Manifest`, `Resource`, and
-`Operation` as the shared DTOs. Call `Manifest.Validate` before publishing a
-manifest and persist its `Fingerprint`. The platform loader remains responsible
+`Operation` as the shared DTOs. Call `Manifest.Validate` for an ordinary app
+before publishing a manifest and persist its `Fingerprint`. Platform builtins
+have their own loader validation. The platform loader remains responsible
 for reading files, parsing OpenAPI, checking project paths, and building its
 internal catalog. v1 clients must tolerate missing fields from the previous v1
 patch and must not reuse an idempotency key after an unknown submission without

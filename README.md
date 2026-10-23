@@ -22,6 +22,10 @@ application code to inspect protobuf diagnostics. The older
 migration code; it is a low-level escape hatch, not a second execution or
 receipt implementation.
 
+`models.ParseResearchResult` reads the versioned `research.v1` result JSON for
+transcription, frame analysis, and embeddings. Applications must still verify
+the returned kind, model version, dimensions, and frozen input scope.
+
 Application-facing RPC access is capability-scoped by the platform service key
 and app code. The v1 generated service still contains legacy management methods
 for wire compatibility; applications must use only the documented application
