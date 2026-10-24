@@ -325,18 +325,21 @@ func (x *LoginRequest) GetScene() string {
 }
 
 type LoginReply struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	AccessToken   string                 `protobuf:"bytes,2,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
-	ExpiresTime   int64                  `protobuf:"varint,3,opt,name=expires_time,json=expiresTime,proto3" json:"expires_time,omitempty"`
-	TenantId      int64                  `protobuf:"varint,4,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
-	AppId         int64                  `protobuf:"varint,5,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
-	UnitId        int64                  `protobuf:"varint,6,opt,name=unit_id,json=unitId,proto3" json:"unit_id,omitempty"`
-	SectionId     int64                  `protobuf:"varint,7,opt,name=section_id,json=sectionId,proto3" json:"section_id,omitempty"`
-	AppCode       string                 `protobuf:"bytes,8,opt,name=app_code,json=appCode,proto3" json:"app_code,omitempty"`
-	Home          string                 `protobuf:"bytes,9,opt,name=home,proto3" json:"home,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	UserId           int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	AccessToken      string                 `protobuf:"bytes,2,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	ExpiresTime      int64                  `protobuf:"varint,3,opt,name=expires_time,json=expiresTime,proto3" json:"expires_time,omitempty"`
+	TenantId         int64                  `protobuf:"varint,4,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	AppId            int64                  `protobuf:"varint,5,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	UnitId           int64                  `protobuf:"varint,6,opt,name=unit_id,json=unitId,proto3" json:"unit_id,omitempty"`
+	SectionId        int64                  `protobuf:"varint,7,opt,name=section_id,json=sectionId,proto3" json:"section_id,omitempty"`
+	AppCode          string                 `protobuf:"bytes,8,opt,name=app_code,json=appCode,proto3" json:"app_code,omitempty"`
+	Home             string                 `protobuf:"bytes,9,opt,name=home,proto3" json:"home,omitempty"`
+	FrontendEntry    string                 `protobuf:"bytes,10,opt,name=frontend_entry,json=frontendEntry,proto3" json:"frontend_entry,omitempty"`
+	FrontendBasePath string                 `protobuf:"bytes,11,opt,name=frontend_base_path,json=frontendBasePath,proto3" json:"frontend_base_path,omitempty"`
+	FrontendHome     string                 `protobuf:"bytes,12,opt,name=frontend_home,json=frontendHome,proto3" json:"frontend_home,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *LoginReply) Reset() {
@@ -428,6 +431,27 @@ func (x *LoginReply) GetAppCode() string {
 func (x *LoginReply) GetHome() string {
 	if x != nil {
 		return x.Home
+	}
+	return ""
+}
+
+func (x *LoginReply) GetFrontendEntry() string {
+	if x != nil {
+		return x.FrontendEntry
+	}
+	return ""
+}
+
+func (x *LoginReply) GetFrontendBasePath() string {
+	if x != nil {
+		return x.FrontendBasePath
+	}
+	return ""
+}
+
+func (x *LoginReply) GetFrontendHome() string {
+	if x != nil {
+		return x.FrontendHome
 	}
 	return ""
 }
@@ -1069,27 +1093,29 @@ func (x *Position) GetUpdatedAt() int64 {
 }
 
 type App struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Version       string                 `protobuf:"bytes,4,opt,name=version,proto3" json:"version,omitempty"`
-	Status        *int32                 `protobuf:"varint,5,opt,name=status,proto3,oneof" json:"status,omitempty"`
-	ServiceKey    string                 `protobuf:"bytes,6,opt,name=service_key,json=serviceKey,proto3" json:"service_key,omitempty"`
-	RoutePrefix   string                 `protobuf:"bytes,7,opt,name=route_prefix,json=routePrefix,proto3" json:"route_prefix,omitempty"`
-	Home          string                 `protobuf:"bytes,8,opt,name=home,proto3" json:"home,omitempty"`
-	FrontendEntry string                 `protobuf:"bytes,9,opt,name=frontend_entry,json=frontendEntry,proto3" json:"frontend_entry,omitempty"`
-	ExpiresAt     int64                  `protobuf:"varint,10,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
-	Managed       bool                   `protobuf:"varint,11,opt,name=managed,proto3" json:"managed,omitempty"`
-	Icon          string                 `protobuf:"bytes,12,opt,name=icon,proto3" json:"icon,omitempty"`
-	Description   string                 `protobuf:"bytes,13,opt,name=description,proto3" json:"description,omitempty"`
-	Remark        string                 `protobuf:"bytes,14,opt,name=remark,proto3" json:"remark,omitempty"`
-	TenantAppId   int64                  `protobuf:"varint,15,opt,name=tenant_app_id,json=tenantAppId,proto3" json:"tenant_app_id,omitempty"`
-	Type          string                 `protobuf:"bytes,16,opt,name=type,proto3" json:"type,omitempty"`
-	Url           string                 `protobuf:"bytes,17,opt,name=url,proto3" json:"url,omitempty"`
-	IsPublic      bool                   `protobuf:"varint,18,opt,name=is_public,json=isPublic,proto3" json:"is_public,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Code             string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	Name             string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Version          string                 `protobuf:"bytes,4,opt,name=version,proto3" json:"version,omitempty"`
+	Status           *int32                 `protobuf:"varint,5,opt,name=status,proto3,oneof" json:"status,omitempty"`
+	ServiceKey       string                 `protobuf:"bytes,6,opt,name=service_key,json=serviceKey,proto3" json:"service_key,omitempty"`
+	RoutePrefix      string                 `protobuf:"bytes,7,opt,name=route_prefix,json=routePrefix,proto3" json:"route_prefix,omitempty"`
+	Home             string                 `protobuf:"bytes,8,opt,name=home,proto3" json:"home,omitempty"`
+	FrontendEntry    string                 `protobuf:"bytes,9,opt,name=frontend_entry,json=frontendEntry,proto3" json:"frontend_entry,omitempty"`
+	ExpiresAt        int64                  `protobuf:"varint,10,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	Managed          bool                   `protobuf:"varint,11,opt,name=managed,proto3" json:"managed,omitempty"`
+	Icon             string                 `protobuf:"bytes,12,opt,name=icon,proto3" json:"icon,omitempty"`
+	Description      string                 `protobuf:"bytes,13,opt,name=description,proto3" json:"description,omitempty"`
+	Remark           string                 `protobuf:"bytes,14,opt,name=remark,proto3" json:"remark,omitempty"`
+	TenantAppId      int64                  `protobuf:"varint,15,opt,name=tenant_app_id,json=tenantAppId,proto3" json:"tenant_app_id,omitempty"`
+	Type             string                 `protobuf:"bytes,16,opt,name=type,proto3" json:"type,omitempty"`
+	Url              string                 `protobuf:"bytes,17,opt,name=url,proto3" json:"url,omitempty"`
+	IsPublic         bool                   `protobuf:"varint,18,opt,name=is_public,json=isPublic,proto3" json:"is_public,omitempty"`
+	FrontendBasePath string                 `protobuf:"bytes,19,opt,name=frontend_base_path,json=frontendBasePath,proto3" json:"frontend_base_path,omitempty"`
+	FrontendHome     string                 `protobuf:"bytes,20,opt,name=frontend_home,json=frontendHome,proto3" json:"frontend_home,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *App) Reset() {
@@ -1246,6 +1272,20 @@ func (x *App) GetIsPublic() bool {
 		return x.IsPublic
 	}
 	return false
+}
+
+func (x *App) GetFrontendBasePath() string {
+	if x != nil {
+		return x.FrontendBasePath
+	}
+	return ""
+}
+
+func (x *App) GetFrontendHome() string {
+	if x != nil {
+		return x.FrontendHome
+	}
+	return ""
 }
 
 type Resource struct {
@@ -7150,7 +7190,7 @@ const file_saas_v1_core_proto_rawDesc = "" +
 	"\fLoginRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x14\n" +
-	"\x05scene\x18\x03 \x01(\tR\x05scene\"\x86\x02\n" +
+	"\x05scene\x18\x03 \x01(\tR\x05scene\"\x80\x03\n" +
 	"\n" +
 	"LoginReply\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12!\n" +
@@ -7162,7 +7202,11 @@ const file_saas_v1_core_proto_rawDesc = "" +
 	"\n" +
 	"section_id\x18\a \x01(\x03R\tsectionId\x12\x19\n" +
 	"\bapp_code\x18\b \x01(\tR\aappCode\x12\x12\n" +
-	"\x04home\x18\t \x01(\tR\x04home\"\xe6\x01\n" +
+	"\x04home\x18\t \x01(\tR\x04home\x12%\n" +
+	"\x0efrontend_entry\x18\n" +
+	" \x01(\tR\rfrontendEntry\x12,\n" +
+	"\x12frontend_base_path\x18\v \x01(\tR\x10frontendBasePath\x12#\n" +
+	"\rfrontend_home\x18\f \x01(\tR\ffrontendHome\"\xe6\x01\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05phone\x18\x02 \x01(\tR\x05phone\x12\x14\n" +
@@ -7240,7 +7284,7 @@ const file_saas_v1_core_proto_rawDesc = "" +
 	"created_at\x18\b \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\t \x01(\x03R\tupdatedAtB\t\n" +
-	"\a_status\"\xec\x03\n" +
+	"\a_status\"\xbf\x04\n" +
 	"\x03App\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04code\x18\x02 \x01(\tR\x04code\x12\x12\n" +
@@ -7262,7 +7306,9 @@ const file_saas_v1_core_proto_rawDesc = "" +
 	"\rtenant_app_id\x18\x0f \x01(\x03R\vtenantAppId\x12\x12\n" +
 	"\x04type\x18\x10 \x01(\tR\x04type\x12\x10\n" +
 	"\x03url\x18\x11 \x01(\tR\x03url\x12\x1b\n" +
-	"\tis_public\x18\x12 \x01(\bR\bisPublicB\t\n" +
+	"\tis_public\x18\x12 \x01(\bR\bisPublic\x12,\n" +
+	"\x12frontend_base_path\x18\x13 \x01(\tR\x10frontendBasePath\x12#\n" +
+	"\rfrontend_home\x18\x14 \x01(\tR\ffrontendHomeB\t\n" +
 	"\a_status\"\xf9\x03\n" +
 	"\bResource\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x15\n" +

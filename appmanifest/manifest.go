@@ -26,6 +26,8 @@ type Manifest struct {
 	ServiceKey         string      `json:"service_key" yaml:"service_key"`
 	RoutePrefix        string      `json:"route_prefix" yaml:"route_prefix"`
 	FrontendEntry      string      `json:"frontend_entry" yaml:"frontend_entry"`
+	FrontendBasePath   string      `json:"frontend_base_path,omitempty" yaml:"frontend_base_path,omitempty"`
+	FrontendHome       string      `json:"frontend_home,omitempty" yaml:"frontend_home,omitempty"`
 	Home               string      `json:"home" yaml:"home"`
 	Resources          []Resource  `json:"resources" yaml:"resources"`
 	Operations         []Operation `json:"operations,omitempty" yaml:"-"`
@@ -94,7 +96,10 @@ func (m Manifest) Validate() error {
 	if m.RoutePrefix != "/api/apps/"+m.AppCode+"/v1" || m.ServiceKey == "" {
 		return fmt.Errorf("route prefix or service key is invalid")
 	}
-	if m.FrontendEntry != "bundled" || !strings.HasPrefix(m.Home, "/"+m.AppCode+"/") {
+	if _, err := m.Frontend(); err != nil {
+		return err
+	}
+	if !strings.HasPrefix(m.Home, "/"+m.AppCode+"/") {
 		return fmt.Errorf("frontend entry or home is invalid")
 	}
 	resources := make(map[string]Resource, len(m.Resources))
@@ -213,11 +218,13 @@ func (m Manifest) Fingerprint() (string, error) {
 		Home               string
 		Resources          []fingerprintResource
 		Operations         []Operation
+		FrontendBasePath   string `json:",omitempty"`
+		FrontendHome       string `json:",omitempty"`
 	}{
 		m.SchemaVersion, m.AppCode, m.Name, m.ReleaseVersion,
 		m.PlatformAPIVersion, m.ResourceVersion, m.HTTPContract,
 		m.ServiceKey, m.RoutePrefix, m.FrontendEntry, m.Home,
-		nil, m.Operations,
+		nil, m.Operations, m.FrontendBasePath, m.FrontendHome,
 	}
 	if m.Resources != nil {
 		legacy.Resources = make([]fingerprintResource, 0, len(m.Resources))
